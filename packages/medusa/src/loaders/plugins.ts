@@ -72,17 +72,21 @@ export default async ({
       async (pluginDetails) => await runSetupFunctions(pluginDetails)
     )
   )
-
-  await Promise.all(
-    resolved.map(async (pluginDetails) => {
-      registerRepositories(pluginDetails, container)
-      await registerServices(pluginDetails, container)
-      await registerMedusaApi(pluginDetails, container)
-      registerApi(pluginDetails, app, rootDirectory, container, activityId)
-      registerCoreRouters(pluginDetails, container)
-      registerSubscribers(pluginDetails, container)
-    })
-  )
+  const registerPlugin = async (pluginDetails) => {
+    registerRepositories(pluginDetails, container)
+    await registerServices(pluginDetails, container)
+    await registerMedusaApi(pluginDetails, container)
+    registerApi(pluginDetails, app, rootDirectory, container, activityId)
+    registerCoreRouters(pluginDetails, container)
+    registerSubscribers(pluginDetails, container)
+  }
+  if (process.env.PLUGIN_IN_ORDER) {
+    for (const plugin of resolved) {
+      await registerPlugin(plugin)
+    }
+  } else {
+    await Promise.all(resolved.map(registerPlugin))
+  }
 
   await Promise.all(
     resolved.map(async (pluginDetails) => runLoaders(pluginDetails, container))
