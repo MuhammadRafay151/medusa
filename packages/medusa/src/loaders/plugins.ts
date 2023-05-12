@@ -80,7 +80,7 @@ export default async ({
     registerCoreRouters(pluginDetails, container)
     registerSubscribers(pluginDetails, container)
   }
-  if (process.env.PLUGIN_IN_ORDER) {
+  if (process.env.PLUGIN_IN_ORDER === "true") {
     for (const plugin of resolved) {
       await registerPlugin(plugin)
     }
